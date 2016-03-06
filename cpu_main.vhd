@@ -28,11 +28,12 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity cpu_main is
-    Port ( ab : inout  STD_LOGIC_VECTOR (31 downto 0);
-           db : inout  STD_LOGIC_VECTOR (31 downto 0);
-           cb : inout  STD_LOGIC_VECTOR (31 downto 0);
-           co : out  STD_LOGIC_VECTOR (31 downto 0);
-           ci : in  STD_LOGIC_VECTOR (31 downto 0));
+    Port ( ab : inout  STD_LOGIC_VECTOR (15 downto 0);
+           db : inout  STD_LOGIC_VECTOR (15 downto 0);
+           cb : inout  STD_LOGIC_VECTOR (15 downto 0);
+           co : in  STD_LOGIC_VECTOR (31 downto 0);
+           ci : out  STD_LOGIC_VECTOR (31 downto 0);
+			  clk : in  STD_LOGIC);
 end cpu_main;
 
 architecture Behavioral of cpu_main is
@@ -122,7 +123,7 @@ signal reg_load	: STD_LOGIC;
 signal needj		: STD_LOGIC;					---寄存器组, 用ri还是rj
 signal regi			: STD_LOGIC_VECTOR (1 downto 0);		---regi编号
 signal regj			: STD_LOGIC_VECTOR (1 downto 0);		---regj编号
-signal muxa			: STD_LOGIC;					---alub的多路选择器
+signal muxa			: STD_LOGIC;					---alub的??路选择器
 signal alus			: STD_LOGIC_VECTOR (2 downto 0);		---alu function选择
 ---TODO, signal CY
 signal ir_load		: STD_LOGIC;
@@ -141,16 +142,22 @@ signal sp_inc		: STD_LOGIC;
 signal sp_dec		: STD_LOGIC;
 signal sp_reset	: STD_LOGIC;
 signal muxb			: STD_LOGIC_VECTOR (2 DOWNTO 0);		---数据总线db输入的多路选择器
+signal run			: STD_LOGIC;
+signal reset		: STD_LOGIC;
+signal mpc_reset	: STD_LOGIC;
 
 ---clk
 signal cpu_clk		: STD_LOGIC;					---CPU时钟
 signal mclk			: STD_LOGIC;					---微程序时钟
 signal mpc_clk		: STD_LOGIC;
+signal mir_clk		: STD_LOGIC;
 signal ir_clk		: STD_LOGIC;
 
 ---output or temperate signal
 signal mrd			: STD_LOGIC;
 signal mwr			: STD_LOGIC;
+signal crd			: STD_LOGIC;
+signal cwr			: STD_LOGIC;
 signal cin			: STD_LOGIC;
 signal cout			: STD_LOGIC;
 signal cf			: STD_LOGIC;
@@ -165,16 +172,21 @@ signal tmp			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ir			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal adrh			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal adrl			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal pch 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal pcl 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ma			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal mb			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal m				: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal reg			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ddb 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal md			: STD_LOGIC_VECTOR (9 DOWNTO 0);
+signal mpc			: STD_LOGIC_VECTOR (9 DOWNTO 0);
 signal aab			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal pc			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal adr			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal sp			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal mc			: STD_LOGIC_VECTOR (15 DOWNTO 0);
+signal mir			: STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 -----begin of program-----
 begin
@@ -189,15 +201,58 @@ begin
 	alub <= ma;
 	
 	ialu:		alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
-	
 	iir:		reg1 port map(ir_clk, ir_load, ddb, ir);
-	
 	iadr:		reg_adr port map(mclk, ddb, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, aab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
+	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
 	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
-	---combine db together
-	---care about flag
-	---mpc, mir thing
+	
+	crd <= crdx or not mclk;			---在mclk高电平时可能发生
+	cwr <= cwrx or not mclk;
+	mrd <= crd or ab(15);
+	mwr <= cwr or ab(15) or not clk;
+	
+	ab <= mc;
+	db <= "00000000" & ddb;
+	
+	---process for register mpc
+	---TODO, decode ir, check it
+	md <= "000" & ir(7 downto 4) & "111";
+	impc: process (mpc_clk, mpc_reset)
+	begin
+		if (mpc_reset = '0') then mpc <= "0000000000";
+		elsif (mpc_clk'event and mpc_clk = '1') then 
+			if (mpc_load = '0') then mpc <= md;
+			else mpc <= mpc + 1;
+			end if;
+		end if;
+	end process;
+	ci(9 downto 0) <= mpc;
+	
+	---process for register mir
+	imir: process (mir_clk)
+	begin
+		if (mir_clk'event and mir_clk = '1') then
+			mir <= co;
+		end if;
+	end process;
+	
+	imclk: process(mclk, clk)
+	begin
+		if (run = '0' or reset = '0') then mclk <= '0';
+		elsif (clk'event and clk = '0') then mclk <= not mclk;
+		end if;
+	end process;
+	mpc_clk <= not mclk and clk;
+	mir_clk <= not mpc_clk;
+	
+	---reset signal
+	pc_reset <= reset;
+	sp_reset <= reset;
+	mpc_reset <= reset;
+	
+	---care about FLAG
 	---clock thing
+	---control signal from mir
 end Behavioral;
