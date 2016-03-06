@@ -29,8 +29,10 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity regs is
     Port ( reg_load : in  STD_LOGIC;
-           ri : in  STD_LOGIC_VECTOR (1 downto 0);
+           needj : in  STD_LOGIC;
            mclk : in  STD_LOGIC;
+           i : in  STD_LOGIC_VECTOR (1 downto 0);
+           j : in  STD_LOGIC_VECTOR (1 downto 0);
            db : in  STD_LOGIC_VECTOR (7 downto 0);
            r : out  STD_LOGIC_VECTOR (7 downto 0));
 end regs;
@@ -40,12 +42,16 @@ signal r0 : STD_LOGIC_VECTOR (7 downto 0);
 signal r1 : STD_LOGIC_VECTOR (7 downto 0);
 signal r2 : STD_LOGIC_VECTOR (7 downto 0);
 signal r3 : STD_LOGIC_VECTOR (7 downto 0);
+signal ri : STD_LOGIC_VECTOR (7 downto 0);
+signal rj : STD_LOGIC_VECTOR (7 downto 0);
+signal mask : STD_LOGIC_VECTOR (7 downto 0);
 begin
-	process (mclk, reg_load, ri, db)
+	---load logic, always load to ri.
+	process (mclk)
 	begin
 		if (mclk'event and mclk = '1') then
 			if (reg_load = '0') then
-				case ri is
+				case i is
 					when "00" =>	r0 <= db;
 					when "01" =>	r1 <= db;
 					when "10" =>	r2 <= db;
@@ -55,14 +61,29 @@ begin
 		end if;
 	end process;
 	
-	process (ri, r0, r1, r2, r3)
+	---read ri logic
+	process (i, r0, r1, r2, r3)
 	begin
-		case ri is
-			when "00" =>	r <= r0;
-			when "01" =>	r <= r1;
-			when "10" =>	r <= r2;
-			when others =>	r <= r3;
+		case i is
+			when "00" =>	ri <= r0;
+			when "01" =>	ri <= r1;
+			when "10" =>	ri <= r2;
+			when others =>	ri <= r3;
 		end case;
 	end process;
+	
+	---read ri logic
+	process (j, r0, r1, r2, r3)
+	begin
+		case j is
+			when "00" =>	rj <= r0;
+			when "01" =>	rj <= r1;
+			when "10" =>	rj <= r2;
+			when others =>	rj <= r3;
+		end case;
+	end process;
+	
+	mask <= (needj, needj, needj, needj, needj, needj, needj, needj);
+	r <= (ri and mask) or (rj and not mask);
 end Behavioral;
 

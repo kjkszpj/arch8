@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    10:32:32 03/06/2016 
+-- Create Date:    12:16:31 03/06/2016 
 -- Design Name: 
--- Module Name:    reg_a - Behavioral 
+-- Module Name:    reg1 - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -27,29 +27,19 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity reg_a is
-    Port ( db : in  STD_LOGIC_VECTOR (7 downto 0);
-           mclk : in  STD_LOGIC;
-           a_load : in  STD_LOGIC;
-           asr : in  STD_LOGIC;
-			  a_clear : in  STD_LOGIC;
-           a : inout  STD_LOGIC_VECTOR (7 downto 0));
-end reg_a;
+entity reg1 is
+    Port ( clk : in  STD_LOGIC;
+           load : in  STD_LOGIC;
+           x : in  STD_LOGIC_VECTOR (7 downto 0);
+           r : out  STD_LOGIC_VECTOR (7 downto 0));
+end reg1;
 
-architecture Behavioral of reg_a is
+architecture Behavioral of reg1 is
 begin
-	process (mclk)
-	variable temp : STD_LOGIC_VECTOR (2 downto 0);
+	process (clk)
 	begin
-		if (mclk'event and mclk = '1') then
-			temp := (a_load, asr, a_clear);
-			case temp is
-				when "111" =>	a <= a;
-				when "011" =>	a <= db;
-				when "101" =>	a <= a(7) & a(7 downto 1);
-				when "110" =>	a <= "00000000";
-				when others =>	a <= a;
-			end case;
+		if (clk'event and clk = '1') then
+			if (load = '0') then r <= x; end if;
 		end if;
 	end process;
 end Behavioral;
