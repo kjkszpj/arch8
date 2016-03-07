@@ -145,6 +145,9 @@ signal muxb			: STD_LOGIC_VECTOR (2 DOWNTO 0);		---数据总线db输入的多路选择器
 signal run			: STD_LOGIC;
 signal reset		: STD_LOGIC;
 signal mpc_reset	: STD_LOGIC;
+signal krix			: STD_LOGIC;
+signal prix			: STD_LOGIC;
+signal flag_set		: STD_LOGIC;
 
 ---clk
 signal cpu_clk		: STD_LOGIC;					---CPU时钟
@@ -214,6 +217,7 @@ begin
 	mwr <= cwr or ab(15) or not clk;
 	
 	ab <= mc;
+	---TODO, check connection of db and ddb
 	db <= "00000000" & ddb;
 	
 	---process for register mpc
@@ -238,6 +242,7 @@ begin
 		end if;
 	end process;
 	
+	---clock thing
 	imclk: process(mclk, clk)
 	begin
 		if (run = '0' or reset = '0') then mclk <= '0';
@@ -251,8 +256,49 @@ begin
 	pc_reset <= reset;
 	sp_reset <= reset;
 	mpc_reset <= reset;
+
+	---pc_l
+	ipc_load: process(pc_load, CF, ZF, NF)
+	begin
+		case pc_load is
+			when "000" =>	pc_l <= '0';		---always load
+			when "001" =>	pc_l <= not CF;		---JC
+			when "010" =>	pc_l <= NF or ZF;	---JP
+			when "011" =>	pc_l <= ZF;			---JNZ
+			when "111" =>	pc_l <= '1';		---not load
+			when others =>	pc_l <= '1';
+		end case;
+	end process;
+
+	---flag
+	icf: process(mclk)
+	begin
+		if mclk'event and mclk = '1' then 
+			if flag_set = '0' then
+				cf <= cout;
+			end if;
+		end if;
+	end process;
+
+	izf: process(mclk)
+	begin
+		if (mclk'event and mclk = '1') then 
+			if (flag_set = '0') then
+				zf <= not alu_result(7) and not alu_result(6) and not alu_result(5) and not alu_result(4) and not alu_result(3) and not alu_result(2) and not alu_result(1) and not alu_result(0);
+			end if;
+		end if;
+	end process;
+
+	inf: process(mclk)
+	begin
+		if (mclk'event and mclk = '1') then 
+			if (flag_set = '0') then
+				nf <= alu_result(7);
+			end if;
+		end if;
+	end process;
 	
-	---care about FLAG
-	---clock thing
+	---cin logic
 	---control signal from mir
+	---io related
 end Behavioral;
