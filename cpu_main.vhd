@@ -148,7 +148,7 @@ signal mpc_reset	: STD_LOGIC;
 signal krix			: STD_LOGIC;
 signal prix			: STD_LOGIC;
 signal flag_set		: STD_LOGIC;
-signal mux_cin		: STD_LOGIC_VECTOR (2 DOWNTO 0);
+signal mux_cin		: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 ---clk
 signal cpu_clk		: STD_LOGIC;					---CPU时钟
@@ -168,7 +168,8 @@ signal cf			: STD_LOGIC;
 signal zf			: STD_LOGIC;
 signal nf			: STD_LOGIC;
 signal adr_c		: STD_LOGIC;
-signal a			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal io_query	: STD_LOGIC;
+signal a				: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal act			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alua			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alub			: STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -181,7 +182,7 @@ signal pch 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal pcl 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ma			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal mb			: STD_LOGIC_VECTOR (7 DOWNTO 0);
-signal m			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal m				: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal reg			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ddb 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal md			: STD_LOGIC_VECTOR (9 DOWNTO 0);
@@ -199,7 +200,7 @@ signal iow			: STD_LOGIC;
 
 -----begin of program-----
 begin
-	ddb <= db(7 downto 0);
+	---	ddb <= db(7 downto 0);
 	ia:		reg_a port map(ddb, mclk, a_load, a_asr, a_clear, a);
 	iact:		reg1 port map(mclk, act_load, a, act);
 	alua <= act;
@@ -217,18 +218,18 @@ begin
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
 	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
 	
-	crd <= crdx or not mclk;			---在mclk高电平时可能发生
+	crd <= crdx or not mclk;			---在mclk高???绞笨赡芊⑸?	
 	cwr <= cwrx or not mclk;
 	mrd <= crd or ab(15);
 	mwr <= cwr or ab(15) or not clk;
 	
-	ab <= mc;
-	---TODO, check connection of db and ddb
-	db <= "00000000" & ddb;
+	---TODO, check
+	ddb <= mb;
 	
-	---process for register mpc
 	---TODO, decode ir, check it
 	md <= "000" & ir(7 downto 4) & "111";
+	
+	---mpc & mir
 	impc: process (mpc_clk, mpc_reset)
 	begin
 		if (mpc_reset = '0') then mpc <= "0000000000";
@@ -239,8 +240,7 @@ begin
 		end if;
 	end process;
 	ci(9 downto 0) <= mpc;
-	
-	---process for register mir
+
 	imir: process (mir_clk)
 	begin
 		if (mir_clk'event and mir_clk = '1') then
@@ -249,7 +249,7 @@ begin
 	end process;
 	
 	---clock thing
-	imclk: process (mclk, clk)
+	imclk: process (run, reset, clk, mclk)
 	begin
 		if (run = '0' or reset = '0') then mclk <= '0';
 		elsif (clk'event and clk = '0') then mclk <= not mclk;
@@ -322,18 +322,23 @@ begin
 			adr_c <= cout;
 		end if;
 	end process;
-	---io related
-	process (ab, mrd)
-	variable stat_query : STD_LOGIC;
-	begin
-		stat_query := ab(15) and ab(14) and not mrd;
-		ddb <= krix & "000000" & prix;
-		---warning?
-	end process;
-
+	
+	---io related, query about 0xC000 before io
+	io_query <= not (ab(15) and ab(14)) or mrd;
 	---warning, clk related?
 	ior <= not ab(15) or not ab(0) or crd;
 	iow <= not ab(15) or not ab(1) or cwr or not clk;
+	
+	---bus, ab, db, probably cb?
+	ab <= mc;
+	idb: process(io_query, krix, prix, ddb)
+	begin
+		if (io_query = '0') then
+			db <= "00000000" & krix & "000000" & prix;
+		else
+			db <= "00000000" & ddb;
+		end if;
+	end process;
 	
 	---control signal list from mir
 end Behavioral;
