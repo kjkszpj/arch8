@@ -147,7 +147,7 @@ signal reset		: STD_LOGIC;
 signal mpc_reset	: STD_LOGIC;
 signal krix			: STD_LOGIC;
 signal prix			: STD_LOGIC;
-signal flag_set		: STD_LOGIC;
+signal flag_set	: STD_LOGIC;
 signal mux_cin		: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 ---clk
@@ -341,4 +341,34 @@ begin
 	end process;
 	
 	---control signal list from mir
+	a_load <= mir(0);
+	a_asr <= mir(1);
+	a_clear <= mir(2);
+	tmp_load <= mir(3);
+	act_load <= mir(4);
+	needj <= mir(5);
+	reg_load <= mir(6);
+	muxa <= mir(7);
+	alus(0) <= mir(8);
+	alus(1) <= mir(9);
+	alus(2) <= mir(10);
+	mux_cin(0) <= mir(11);
+	mux_cin(1) <= mir(12);
+	flag_set <= mir(13);
+	ir_load <= mir(14);
+	adrh_load <= mir(15);
+	adrl_load <= mir(16);
+	ahs <= mir(17);
+	muxc(0) <= mir(18);
+	muxc(1) <= mir(19);
+	pc_inc <= mir(20);
+	pc_load(0) <= mir(23);
+	pc_load(1) <= mir(24);
+	pc_load(2) <= mir(25);
+	mpc_load <= mir(26);
+	crdx <= mir(27);
+	cwrx <= mir(28);
+	muxb(0) <= mir(29);
+	muxb(1) <= mir(30);
+	muxb(2) <= mir(31);
 end Behavioral;
