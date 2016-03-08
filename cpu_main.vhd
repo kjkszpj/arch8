@@ -148,6 +148,7 @@ signal mpc_reset	: STD_LOGIC;
 signal krix			: STD_LOGIC;
 signal prix			: STD_LOGIC;
 signal flag_set		: STD_LOGIC;
+signal mux_cin		: STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 ---clk
 signal cpu_clk		: STD_LOGIC;					---CPU ±÷”
@@ -166,7 +167,8 @@ signal cout			: STD_LOGIC;
 signal cf			: STD_LOGIC;
 signal zf			: STD_LOGIC;
 signal nf			: STD_LOGIC;
-signal a				: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal adr_c		: STD_LOGIC;
+signal a			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal act			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alua			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alub			: STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -179,7 +181,7 @@ signal pch 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal pcl 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ma			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal mb			: STD_LOGIC_VECTOR (7 DOWNTO 0);
-signal m				: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal m			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal reg			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ddb 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal md			: STD_LOGIC_VECTOR (9 DOWNTO 0);
@@ -190,6 +192,10 @@ signal adr			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal sp			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal mc			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal mir			: STD_LOGIC_VECTOR (31 DOWNTO 0);
+
+---IO related
+signal ior 			: STD_LOGIC;
+signal iow			: STD_LOGIC;
 
 -----begin of program-----
 begin
@@ -243,7 +249,7 @@ begin
 	end process;
 	
 	---clock thing
-	imclk: process(mclk, clk)
+	imclk: process (mclk, clk)
 	begin
 		if (run = '0' or reset = '0') then mclk <= '0';
 		elsif (clk'event and clk = '0') then mclk <= not mclk;
@@ -258,7 +264,7 @@ begin
 	mpc_reset <= reset;
 
 	---pc_l
-	ipc_load: process(pc_load, CF, ZF, NF)
+	ipc_load: process (pc_load, CF, ZF, NF)
 	begin
 		case pc_load is
 			when "000" =>	pc_l <= '0';		---always load
@@ -271,7 +277,7 @@ begin
 	end process;
 
 	---flag
-	icf: process(mclk)
+	icf: process (mclk)
 	begin
 		if mclk'event and mclk = '1' then 
 			if flag_set = '0' then
@@ -280,7 +286,7 @@ begin
 		end if;
 	end process;
 
-	izf: process(mclk)
+	izf: process (mclk)
 	begin
 		if (mclk'event and mclk = '1') then 
 			if (flag_set = '0') then
@@ -289,7 +295,7 @@ begin
 		end if;
 	end process;
 
-	inf: process(mclk)
+	inf: process (mclk)
 	begin
 		if (mclk'event and mclk = '1') then 
 			if (flag_set = '0') then
@@ -299,6 +305,35 @@ begin
 	end process;
 	
 	---cin logic
-	---control signal from mir
+	icin: process (mux_cin, cf, adr_c)
+	begin
+		case mux_cin is
+			when "00" =>	cin <= '0';
+			when "01" =>	cin <= cf;
+			when "10" =>	cin <= adr_c;
+			when "11" =>	cin <= '1';
+			when others =>	cin <= '0';
+		end case;
+	end process;
+
+	iadr_c: process (mclk)
+	begin
+		if (mclk'event and mclk = '1') then
+			adr_c <= cout;
+		end if;
+	end process;
 	---io related
+	process (ab, mrd)
+	variable stat_query : STD_LOGIC;
+	begin
+		stat_query := ab(15) and ab(14) and not mrd;
+		ddb <= krix & "000000" & prix;
+		---warning?
+	end process;
+
+	---warning, clk related?
+	ior <= not ab(15) or not ab(0) or crd;
+	iow <= not ab(15) or not ab(1) or cwr or not clk;
+	
+	---control signal list from mir
 end Behavioral;
