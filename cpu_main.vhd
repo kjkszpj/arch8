@@ -244,6 +244,7 @@ begin
 	imir: process (mir_clk)
 	begin
 		if (mir_clk'event and mir_clk = '1') then
+		---TODO, co or ci?
 			mir <= co;
 		end if;
 	end process;
@@ -290,7 +291,7 @@ begin
 	begin
 		if (mclk'event and mclk = '1') then 
 			if (flag_set = '0') then
-				zf <= not alu_result(7) and not alu_result(6) and not alu_result(5) and not alu_result(4) and not alu_result(3) and not alu_result(2) and not alu_result(1) and not alu_result(0);
+				zf <= not (alu_result(7) or alu_result(6) or alu_result(5) or alu_result(4) or alu_result(3) or alu_result(2) or alu_result(1) or alu_result(0));
 			end if;
 		end if;
 	end process;
@@ -304,7 +305,7 @@ begin
 		end if;
 	end process;
 	
-	---cin logic
+	---cin logic, 0 for no cin
 	icin: process (mux_cin, cf, adr_c)
 	begin
 		case mux_cin is
@@ -325,7 +326,7 @@ begin
 	
 	---io related, query about 0xC000 before io
 	io_query <= not (ab(15) and ab(14)) or mrd;
-	---warning, clk related?
+	---warning, clk related? io & clk
 	ior <= not ab(15) or not ab(0) or crd;
 	iow <= not ab(15) or not ab(1) or cwr or not clk;
 	
