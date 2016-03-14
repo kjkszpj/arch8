@@ -1,6 +1,4 @@
-PINLOCK_BEGIN
-
-Fri Feb 23 10:12:19 2001
+#PINLOCK_BEGIN
 
 NET "DB<15>"		LOC = "P100";
 NET "DB<14>"		LOC = "P101";
@@ -34,9 +32,9 @@ NET "AB<3>"		LOC = "P7";
 NET "AB<2>"		LOC = "P8";
 NET "AB<1>"		LOC = "P9";
 NET "AB<0>"		LOC = "P10";
-NET "MUX<2>"		LOC = "P97";
-NET "MUX<1>"		LOC = "P96";
-NET "MUX<0>"		LOC = "P95";
+NET "sMUX<2>"		LOC = "P97";
+NET "sMUX<1>"		LOC = "P96";
+NET "sMUX<0>"		LOC = "P95";
 NET "CO<31>"		LOC = "P29";
 NET "CO<30>"		LOC = "P30";
 NET "CO<29>"		LOC = "P31";
@@ -87,7 +85,7 @@ NET "CI<18>"		LOC = "P123";
 NET "CI<17>"		LOC = "P122";
 NET "CI<16>"		LOC = "P121";
 NET "CI<15>"		LOC = "P120";
-NET "CI<14>"		LOC0 = "P119";
+NET "CI<14>"		LOC = "P119";
 NET "CI<13>"		LOC = "P115";
 NET "CI<12>"		LOC = "P114";
 NET "CI<11>"		LOC = "P113";
@@ -101,21 +99,20 @@ NET "CI<3>"		LOC = "P86";
 NET "CI<2>"		LOC = "P83";
 NET "CI<1>"		LOC = "P82";
 NET "CI<0>"		LOC = "P81";
-NET "MCLK"		LOC = "P192";
-NET "CRD"		LOC = "P24";
-NET "IOW"		LOC = "P99";
-NET "IOR"		LOC = "P84";
-NET "CTRL4"		LOC = "P168";
-NET "CTRL3"		LOC = "P98";
-NET "CTRL2"		LOC = "P166";
-NET "CTRL1"		LOC = "P165";
-NET "CWR"		LOC = "P23";
-NET "CLK"		LOC = "P94";
-NET "CLKG"		LOC = "P80";
-NET "RUN"		LOC = "P109";
-NET "RESET"		LOC = "P108";
-NET "PRIX"		LOC= "P193";
-NET "KRIX"		LOC = "P194";
+NET "sMCLK"		LOC = "P192";
+NET "sMRD"		LOC = "P24";
+NET "sIOW"		LOC = "P99";
+NET "sIOR"		LOC = "P84";
+NET "sCTRL4"		LOC = "P168";
+NET "sCTRL3"		LOC = "P98";
+NET "sCTRL2"		LOC = "P166";
+NET "sCTRL1"		LOC = "P165";
+NET "sMWR"		LOC = "P23";
+NET "sCLK"		LOC = "P94";
+#NET "sCLKG"		LOC = "P80";
+NET "sRUN"		LOC = "P109";
+NET "sRESET"		LOC = "P108";
+NET "sPRIX"		LOC= "P193";
+NET "sKRIX"		LOC = "P194";
 
-PINLOCK_END
-
+#PINLOCK_END

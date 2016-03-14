@@ -34,14 +34,14 @@ entity regs is
            i : in  STD_LOGIC_VECTOR (1 downto 0);
            j : in  STD_LOGIC_VECTOR (1 downto 0);
            db : in  STD_LOGIC_VECTOR (7 downto 0);
-           r : out  STD_LOGIC_VECTOR (7 downto 0));
+           r : out  STD_LOGIC_VECTOR (7 downto 0);
+			  r0 : inout  STD_LOGIC_VECTOR (7 downto 0);
+			  r1 : inout  STD_LOGIC_VECTOR (7 downto 0);
+			  r2 : inout  STD_LOGIC_VECTOR (7 downto 0);
+			  r3 : inout  STD_LOGIC_VECTOR (7 downto 0));
 end regs;
 
 architecture Behavioral of regs is
-signal r0 : STD_LOGIC_VECTOR (7 downto 0);
-signal r1 : STD_LOGIC_VECTOR (7 downto 0);
-signal r2 : STD_LOGIC_VECTOR (7 downto 0);
-signal r3 : STD_LOGIC_VECTOR (7 downto 0);
 signal ri : STD_LOGIC_VECTOR (7 downto 0);
 signal rj : STD_LOGIC_VECTOR (7 downto 0);
 signal mask : STD_LOGIC_VECTOR (7 downto 0);

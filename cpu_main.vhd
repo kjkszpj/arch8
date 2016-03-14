@@ -30,10 +30,24 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity cpu_main is
     Port ( ab : inout  STD_LOGIC_VECTOR (15 downto 0);
            db : inout  STD_LOGIC_VECTOR (15 downto 0);
-           cb : inout  STD_LOGIC_VECTOR (15 downto 0);
            co : in  STD_LOGIC_VECTOR (31 downto 0);
            ci : out  STD_LOGIC_VECTOR (31 downto 0);
-			  clk : in  STD_LOGIC);
+			  sMUX : inout std_logic_vector(2 downto 0);
+			  sMCLK : out STD_LOGIC;
+			  sMRD : out STD_LOGIC;
+			  sIOW : out STD_LOGIC;
+			  sIOR : out STD_LOGIC;
+			  sCTRL4 : out STD_LOGIC;
+			  sCTRL3 : out STD_LOGIC;
+			  sCTRL2 : out STD_LOGIC;
+			  sCTRL1 : out STD_LOGIC;
+			  sMWR : out STD_LOGIC;
+			  sCLK : in STD_LOGIC;
+			  --- sCLKG : in STD_LOGIC;
+			  sRUN : in STD_LOGIC;
+			  sRESET : in STD_LOGIC;
+			  sPRIX : in STD_LOGIC;
+			  sKRIX : in STD_LOGIC);
 end cpu_main;
 
 architecture Behavioral of cpu_main is
@@ -101,7 +115,11 @@ architecture Behavioral of cpu_main is
 				  i : in  STD_LOGIC_VECTOR (1 downto 0);
 				  j : in  STD_LOGIC_VECTOR (1 downto 0);
 				  db : in  STD_LOGIC_VECTOR (7 downto 0);
-				  r : out  STD_LOGIC_VECTOR (7 downto 0));
+				  r : out  STD_LOGIC_VECTOR (7 downto 0);
+				  r0 : inout  STD_LOGIC_VECTOR (7 downto 0);
+				  r1 : inout  STD_LOGIC_VECTOR (7 downto 0);
+				  r2 : inout  STD_LOGIC_VECTOR (7 downto 0);
+				  r3 : inout  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component alu is
 		 Port ( a : in  STD_LOGIC_VECTOR (7 downto 0);
@@ -152,11 +170,9 @@ signal flag_set	: STD_LOGIC;
 signal mux_cin		: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 ---clk
-signal cpu_clk		: STD_LOGIC;					---CPU ±÷”
 signal mclk			: STD_LOGIC;					---Œ¢≥Ã–Ú ±÷”
 signal mpc_clk		: STD_LOGIC;
 signal mir_clk		: STD_LOGIC;
-signal ir_clk		: STD_LOGIC;
 
 ---output or temperate signal
 signal mrd			: STD_LOGIC;
@@ -170,6 +186,7 @@ signal zf			: STD_LOGIC;
 signal nf			: STD_LOGIC;
 signal adr_c		: STD_LOGIC;
 signal io_query	: STD_LOGIC;
+signal clk			: STD_LOGIC;
 signal a				: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal act			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alua			: STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -183,12 +200,15 @@ signal pch 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal pcl 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ma			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal mb			: STD_LOGIC_VECTOR (7 DOWNTO 0);
-signal m				: STD_LOGIC_VECTOR (7 DOWNTO 0);
+---signal m				: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal reg			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal ddb 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal r0 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal r1 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal r2 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+signal r3 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal md			: STD_LOGIC_VECTOR (9 DOWNTO 0);
 signal mpc			: STD_LOGIC_VECTOR (9 DOWNTO 0);
-signal aab			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal pc			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal adr			: STD_LOGIC_VECTOR (15 DOWNTO 0);
 signal sp			: STD_LOGIC_VECTOR (15 DOWNTO 0);
@@ -208,14 +228,14 @@ begin
 	alua <= act;
 	
 	itmp:		reg1 port map(mclk, tmp_load, ddb, tmp);
-	iregs:	regs port map(reg_load, needj, mclk, regi, regj, ddb, reg);
+	iregs:	regs port map(reg_load, needj, mclk, regi, regj, ddb, reg, r0, r1, r2, r3);
 	imuxa:	mux_a port map(muxa, tmp, reg, ma);
 	alub <= ma;
 	
 	ialu:		alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
-	iir:		reg1 port map(ir_clk, ir_load, ddb, ir);
+	iir:		reg1 port map(mclk, ir_load, ddb, ir);
 	iadr:		reg_adr port map(mclk, ddb, ab, adrh_load, adrl_load, ahs, adrh, adrl);
-	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, aab, "0000000000000000", pc);
+	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
 	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
@@ -241,7 +261,8 @@ begin
 			end if;
 		end if;
 	end process;
-	ci(9 downto 0) <= mpc;
+	CI(9 downto 0) <= mpc;
+	CI(15 downto 10) <= "000000";
 
 	imir: process (mir_clk)
 	begin
@@ -344,8 +365,36 @@ begin
 	end process;
 	
 	---control bus
+	clk <= sCLK;
+	run <= sRUN;
+	reset <= sRESET;
+	prix <= sPRIX;
+	krix <= sKRIX;
+	sMWR <= mwr;
+	sMRD <= mrd;
+	sMCLK <= mclk;
+	sIOW <= iow;
+	sIOR <= ior;
 	
+	---internel name
+	regi <= ir(1 downto 0);
+	regj <= ir(3 downto 2);
+	pch <= pc(15 downto 8);
+	pcl <= pc(7 downto 0);
+	adr <= adrh & adrl;
 	
+	---MUX, to watch signal at CI(16--31)
+	CI(31 downto 24) <= 	a		when sMUX = "000" else
+								pch	when sMUX = "001" else
+								adrh	when sMUX = "010" else
+								r0		when sMUX = "011" else
+								r2;
+	CI(23 downto 16) <=	ir		when sMUX = "000" else
+								pcl	when sMUX = "001" else
+								adrl	when sMUX = "010" else
+								r1		when sMUX = "011" else
+								r3;
+								
 	---control signal list from mir
 	a_load <= mir(0);
 	a_asr <= mir(1);
