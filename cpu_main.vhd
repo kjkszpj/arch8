@@ -87,6 +87,7 @@ architecture Behavioral of cpu_main is
 	component reg_adr is
 		 Port ( mclk : in  STD_LOGIC;
 				  db : in  STD_LOGIC_VECTOR (7 downto 0);
+				  ab : in  STD_LOGIC_VECTOR (15 downto 0);
 				  adrh_load : in  STD_LOGIC;
 				  adrl_load : in  STD_LOGIC;
 				  ahs : in  STD_LOGIC;
@@ -341,6 +342,9 @@ begin
 			db <= "00000000" & ddb;
 		end if;
 	end process;
+	
+	---control bus
+	
 	
 	---control signal list from mir
 	a_load <= mir(0);
