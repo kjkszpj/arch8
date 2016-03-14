@@ -202,6 +202,7 @@ signal iow			: STD_LOGIC;
 begin
 	---	ddb <= db(7 downto 0);
 	ia:		reg_a port map(ddb, mclk, a_load, a_asr, a_clear, a);
+	--- TODO, something wrong about the act, when should it load?
 	iact:		reg1 port map(mclk, act_load, a, act);
 	alua <= act;
 	
@@ -212,7 +213,7 @@ begin
 	
 	ialu:		alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
 	iir:		reg1 port map(ir_clk, ir_load, ddb, ir);
-	iadr:		reg_adr port map(mclk, ddb, adrh_load, adrl_load, ahs, adrh, adrl);
+	iadr:		reg_adr port map(mclk, ddb, ab, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, aab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
@@ -320,7 +321,7 @@ begin
 	iadr_c: process (mclk)
 	begin
 		if (mclk'event and mclk = '1') then
-			adr_c <= cout;
+			adr_c <= cout;									---always load, no control signal needed
 		end if;
 	end process;
 	
@@ -363,6 +364,8 @@ begin
 	muxc(0) <= mir(18);
 	muxc(1) <= mir(19);
 	pc_inc <= mir(20);
+	sp_dec <= mir(21);
+	sp_inc <= mir(22);
 	pc_load(0) <= mir(23);
 	pc_load(1) <= mir(24);
 	pc_load(2) <= mir(25);

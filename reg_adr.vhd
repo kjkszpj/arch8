@@ -29,7 +29,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity reg_adr is
     Port ( mclk : in  STD_LOGIC;
-			  db : in  STD_LOGIC_VECTOR (7 downto 0);
+		   db : in  STD_LOGIC_VECTOR (7 downto 0);
+		   ab : in  STD_LOGIC_VECTOR (15 downto 0);
            adrh_load : in  STD_LOGIC;
            adrl_load : in  STD_LOGIC;
            ahs : in  STD_LOGIC;
@@ -41,13 +42,14 @@ architecture Behavioral of reg_adr is
 begin
 	---	for adrh, 0b01111110 = 0x7E
 	process (mclk, adrh_load, ahs)
-	variable temp : STD_LOGIC_VECTOR(1 downto 0);
+	variable temp : STD_LOGIC_VECTOR(2 downto 0);
 	begin
 		if (mclk'event and mclk = '1') then
-			temp := adrh_load & ahs;
+			temp := adrh_load & adrl_load & ahs;
 			case temp is
-				when "01" =>	adrh <= db;
-				when "10" => 	adrh <= "01111110";
+				when "011" =>	adrh <= db;
+				when "110" => 	adrh <= "01111110";
+				when "001" =>	adrh <= ab(15 downto 8);
 				when others =>	adrh <= adrh;
 			end case;
 		end if;
@@ -55,10 +57,13 @@ begin
 	
 	---	for adrl
 	process (mclk, adrl_load)
+	variable temp : STD_LOGIC_VECTOR(1 downto 0);
 	begin
 		if (mclk'event and mclk = '1') then 
-			case (adrl_load) is
-				when '0' =>		adrl <= db;
+			temp := adrh_load & adrl_load;
+			case temp is
+				when "10" =>	adrl <= db;
+				when "00" =>	adrl <= ab(7 downto 0);
 				when others => adrl <= adrl;
 			end case;
 		end if;
