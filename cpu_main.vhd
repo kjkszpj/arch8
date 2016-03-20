@@ -253,16 +253,16 @@ begin
 	md <= "000" & ir(7 downto 4) & "111";
 	
 	---mpc & mir
-	impc: process (mpc_clk, mpc_reset)
-	begin
-		if (mpc_reset = '0') then mpc <= "0000000000";
-		elsif (mpc_clk'event and mpc_clk = '1') then 
-			if (mpc_load = '0') then mpc <= md;
-			else mpc <= mpc + 1;
-			end if;
-		end if;
-	end process;
-	CI(9 downto 0) <= mpc;
+--	impc: process (mpc_clk, mpc_reset)
+--	begin
+--		if (mpc_reset = '0') then mpc <= "0000000000";
+--		elsif (mpc_clk'event and mpc_clk = '1') then 
+--			if (mpc_load = '0') then mpc <= md;
+--			else mpc <= mpc + 1;
+--			end if;
+--		end if;
+--	end process;
+--	CI(9 downto 0) <= mpc;
 	CI(15 downto 10) <= "000000";
 
 	imir: process (mir_clk)
