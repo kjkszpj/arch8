@@ -137,7 +137,7 @@ signal a_load		: STD_LOGIC;
 signal a_asr		: STD_LOGIC;					---算术右移信号
 signal a_clear		: STD_LOGIC;					---to clear a as 0
 signal tmp_load	: STD_LOGIC;
-signal act_load	: STD_LOGIC;
+--- signal act_load	: STD_LOGIC;
 signal reg_load	: STD_LOGIC;
 signal needj		: STD_LOGIC;					---寄存器组, 用ri还是rj
 signal regi			: STD_LOGIC_VECTOR (1 downto 0);		---regi编号
@@ -188,7 +188,7 @@ signal adr_c		: STD_LOGIC;
 signal io_query	: STD_LOGIC;
 signal clk			: STD_LOGIC;
 signal a				: STD_LOGIC_VECTOR (7 DOWNTO 0);
-signal act			: STD_LOGIC_VECTOR (7 DOWNTO 0);
+--- signal act			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alua			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alub			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal alu_result	: STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -223,9 +223,10 @@ signal iow			: STD_LOGIC;
 begin
 	---	ddb <= db(7 downto 0);
 	ia:		reg_a port map(ddb, mclk, a_load, a_asr, a_clear, a);
-	--- TODO, something wrong about the act, when should it load?
-	iact:		reg1 port map(mclk, act_load, a, act);
-	alua <= act;
+	--- TODO, no act
+	--- iact:		reg1 port map(mclk, act_load, a, act);
+	--- alua <= act;
+	alua <= a;
 	
 	itmp:		reg1 port map(mclk, tmp_load, ddb, tmp);
 	iregs:	regs port map(reg_load, needj, mclk, regi, regj, ddb, reg, r0, r1, r2, r3);
@@ -400,7 +401,7 @@ begin
 	a_asr <= mir(1);
 	a_clear <= mir(2);
 	tmp_load <= mir(3);
-	act_load <= mir(4);
+	--- act_load <= mir(4);
 	needj <= mir(5);
 	reg_load <= mir(6);
 	muxa <= mir(7);
