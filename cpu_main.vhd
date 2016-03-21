@@ -250,19 +250,21 @@ begin
 	ddb <= mb;
 	
 	---TODO, decode ir, check it
-	md <= "000" & ir(7 downto 4) & "111";
+	md <=	("000" & ir(7 downto 4) & "111") when ir(7 downto 4) <= "0101" else
+			("000" & ir(5 downto 2) & "111") when ir(7) = '0' else
+			("00" & ir(7 downto 3) & "111");
 	
 	---mpc & mir
---	impc: process (mpc_clk, mpc_reset)
---	begin
---		if (mpc_reset = '0') then mpc <= "0000000000";
---		elsif (mpc_clk'event and mpc_clk = '1') then 
---			if (mpc_load = '0') then mpc <= md;
---			else mpc <= mpc + 1;
---			end if;
---		end if;
---	end process;
---	CI(9 downto 0) <= mpc;
+	impc: process (mpc_clk, mpc_reset)
+	begin
+		if (mpc_reset = '0') then mpc <= "0000000000";
+		elsif (mpc_clk'event and mpc_clk = '1') then 
+			if (mpc_load = '0') then mpc <= md;
+			else mpc <= mpc + 1;
+			end if;
+		end if;
+	end process;
+	CI(9 downto 0) <= mpc;
 	CI(15 downto 10) <= "000000";
 
 	imir: process (mir_clk)
@@ -401,7 +403,7 @@ begin
 	a_asr <= mir(1);
 	a_clear <= mir(2);
 	tmp_load <= mir(3);
-	--- act_load <= mir(4);
+	---act_load <= mir(4);
 	needj <= mir(5);
 	reg_load <= mir(6);
 	muxa <= mir(7);
