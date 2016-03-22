@@ -236,7 +236,7 @@ begin
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
-	imuxc:	mux_c port map(mir(19 downto 18), sp, adr, pc, mc);
+	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
 	
 	crd <= crdx or not mclk;			---ÔÚmclk¸ß???½Ê±¿ÉÄÜ·¢É?	
 	cwr <= cwrx or not mclk;

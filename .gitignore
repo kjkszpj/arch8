@@ -1,7 +1,8 @@
 # intermediate build files
-arch8_xdb/tmp
+arch8_xdb/
 *.lst
 *.s19
+*.html
 
 *.bgn
 *.bit

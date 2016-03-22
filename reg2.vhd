@@ -40,14 +40,14 @@ end reg2;
 
 architecture Behavioral of reg2 is
 begin
-	process (clk)
+	process (clk, reset, y)
 	variable temp : STD_LOGIC_VECTOR (2 downto 0);
 	begin
 		if (reset = '0') then r <= y;
 		elsif (clk'event and clk = '0') then
 			temp := (inc, dec, load);
 			case temp is
-				when "111" => 	r <= r;
+				when "111" => 		r <= r;
 				when "011" =>		r <= r + "0000000000000001";	---TODO: what about carry?
 				when "101" =>		r <= r - "0000000000000001";	---TODO: what about carry?
 				when "110" =>		r <= x;
