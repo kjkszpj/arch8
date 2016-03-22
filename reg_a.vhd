@@ -41,7 +41,7 @@ begin
 	process (mclk)
 	variable temp : STD_LOGIC_VECTOR (2 downto 0);
 	begin
-		if (mclk'event and mclk = '1') then
+		if (mclk'event and mclk = '0') then
 			temp := (a_load, asr, a_clear);
 			case temp is
 				when "111" =>	a <= a;

@@ -303,7 +303,7 @@ begin
 	---flag
 	icf: process (mclk)
 	begin
-		if mclk'event and mclk = '1' then 
+		if mclk'event and mclk = '0' then 
 			if flag_set = '0' then
 				cf <= cout;
 			end if;
@@ -312,7 +312,7 @@ begin
 
 	izf: process (mclk)
 	begin
-		if (mclk'event and mclk = '1') then 
+		if (mclk'event and mclk = '0') then 
 			if (flag_set = '0') then
 				zf <= not (alu_result(7) or alu_result(6) or alu_result(5) or alu_result(4) or alu_result(3) or alu_result(2) or alu_result(1) or alu_result(0));
 			end if;
@@ -321,7 +321,7 @@ begin
 
 	inf: process (mclk)
 	begin
-		if (mclk'event and mclk = '1') then 
+		if (mclk'event and mclk = '0') then 
 			if (flag_set = '0') then
 				nf <= alu_result(7);
 			end if;
@@ -342,7 +342,7 @@ begin
 
 	iadr_c: process (mclk)
 	begin
-		if (mclk'event and mclk = '1') then
+		if (mclk'event and mclk = '0') then
 			adr_c <= cout;									---always load, no control signal needed
 		end if;
 	end process;
@@ -378,16 +378,18 @@ begin
 	adr <= adrh & adrl;
 	
 	---MUX, to watch signal at CI(16--31)
-	CI(31 downto 24) <= 	a		when sMUX = "000" else
+	CI(31 downto 24) <= 			a	when sMUX = "000" else
 								pch	when sMUX = "001" else
 								adrh	when sMUX = "010" else
-								r0		when sMUX = "011" else
-								r2;
-	CI(23 downto 16) <=	ir		when sMUX = "000" else
+								r0	when sMUX = "011" else
+								r2	when sMUX = "100" else
+								mpc(7 downto 0) when sMUX = "101" else
+								CO(31 downto 24);
+	CI(23 downto 16) <=				ir	when sMUX = "000" else
 								pcl	when sMUX = "001" else
 								adrl	when sMUX = "010" else
-								r1		when sMUX = "011" else
-								r3;
+								r1	when sMUX = "011" else
+								r3 or CO(23 downto 16);
 								
 	---control signal list from mir
 	a_load <= mir(0);

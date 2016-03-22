@@ -49,7 +49,7 @@ begin
 	---load logic, always load to ri.
 	process (mclk)
 	begin
-		if (mclk'event and mclk = '1') then
+		if (mclk'event and mclk = '0') then
 			if (reg_load = '0') then
 				case i is
 					when "00" =>	r0 <= db;

@@ -44,7 +44,7 @@ begin
 	process (mclk, adrh_load, ahs)
 	variable temp : STD_LOGIC_VECTOR(2 downto 0);
 	begin
-		if (mclk'event and mclk = '1') then
+		if (mclk'event and mclk = '0') then
 			temp := adrh_load & adrl_load & ahs;
 			case temp is
 				when "011" =>	adrh <= db;
@@ -59,7 +59,7 @@ begin
 	process (mclk, adrl_load)
 	variable temp : STD_LOGIC_VECTOR(1 downto 0);
 	begin
-		if (mclk'event and mclk = '1') then 
+		if (mclk'event and mclk = '0') then 
 			temp := adrh_load & adrl_load;
 			case temp is
 				when "10" =>	adrl <= db;

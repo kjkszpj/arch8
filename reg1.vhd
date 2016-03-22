@@ -38,7 +38,7 @@ architecture Behavioral of reg1 is
 begin
 	process (clk)
 	begin
-		if (clk'event and clk = '1') then
+		if (clk'event and clk = '0') then
 			if (load = '0') then r <= x; end if;
 		end if;
 	end process;
