@@ -29,7 +29,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity cpu_main is
     Port ( ab : inout  STD_LOGIC_VECTOR (15 downto 0);
-           db : inout  STD_LOGIC_VECTOR (15 downto 0);
+           db : inout  STD_LOGIC_VECTOR (7 downto 0);
            co : in  STD_LOGIC_VECTOR (31 downto 0);
            ci : out  STD_LOGIC_VECTOR (31 downto 0);
 			  sMUX : inout std_logic_vector(2 downto 0);
@@ -202,7 +202,6 @@ signal ma			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal mb			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 ---signal m				: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal reg			: STD_LOGIC_VECTOR (7 DOWNTO 0);
-signal ddb 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal r0 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal r1 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
 signal r2 			: STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -221,21 +220,20 @@ signal iow			: STD_LOGIC;
 
 -----begin of program-----
 begin
-	---	ddb <= db(7 downto 0);
-	ia:		reg_a port map(ddb, mclk, a_load, a_asr, a_clear, a);
+	ia:		reg_a port map(db, mclk, a_load, a_asr, a_clear, a);
 	--- TODO, no act
 	--- iact:		reg1 port map(mclk, act_load, a, act);
 	--- alua <= act;
 	alua <= a;
 	
-	itmp:		reg1 port map(mclk, tmp_load, ddb, tmp);
-	iregs:	regs port map(reg_load, needj, mclk, regi, regj, ddb, reg, r0, r1, r2, r3);
+	itmp:		reg1 port map(mclk, tmp_load, db, tmp);
+	iregs:	regs port map(reg_load, needj, mclk, regi, regj, db, reg, r0, r1, r2, r3);
 	imuxa:	mux_a port map(muxa, tmp, reg, ma);
 	alub <= ma;
 	
 	ialu:		alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
-	iir:		reg1 port map(mclk, ir_load, ddb, ir);
-	iadr:		reg_adr port map(mclk, ddb, ab, adrh_load, adrl_load, ahs, adrh, adrl);
+	iir:		reg1 port map(mclk, ir_load, db, ir);
+	iadr:		reg_adr port map(mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
@@ -247,7 +245,6 @@ begin
 	mwr <= cwr or ab(15) or not clk;
 	
 	---TODO, check
-	ddb <= mb;
 	
 	---TODO, decode ir, check it
 	md <=	("000" & ir(7 downto 4) & "111") when ir(7 downto 4) <= "0101" else
@@ -358,14 +355,8 @@ begin
 	
 	---bus, ab, db, probably cb?
 	ab <= mc;
-	idb: process(io_query, krix, prix, ddb)
-	begin
-		if (io_query = '0') then
-			db <= "00000000" & krix & "000000" & prix;
-		else
-			db <= "00000000" & ddb;
-		end if;
-	end process;
+	db <= krix & "000000" & prix when io_query = '0' else
+			mb;
 	
 	---control bus
 	clk <= sCLK;
@@ -403,7 +394,10 @@ begin
 	a_asr <= mir(1);
 	a_clear <= mir(2);
 	tmp_load <= mir(3);
-	---act_load <= mir(4);
+	sCTRL1 <= mir(4);
+	sCTRL2 <= mir(4);
+	sCTRL3 <= mir(4);
+	sCTRL4 <= mir(4);
 	needj <= mir(5);
 	reg_load <= mir(6);
 	muxa <= mir(7);

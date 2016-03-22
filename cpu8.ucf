@@ -1,13 +1,13 @@
 #PINLOCK_BEGIN
 
-NET "DB<15>"		LOC = "P100";
-NET "DB<14>"		LOC = "P101";
-NET "DB<13>"		LOC = "P102";
-NET "DB<12>"		LOC = "P173";
-NET "DB<11>"		LOC = "P174";
-NET "DB<10>"		LOC = "P175";
-NET "DB<9>"		LOC = "P176";
-NET "DB<8>"		LOC = "P178";
+#NET "DB<15>"		LOC = "P100";
+#NET "DB<14>"		LOC = "P101";
+#NET "DB<13>"		LOC = "P102";
+#NET "DB<12>"		LOC = "P173";
+#NET "DB<11>"		LOC = "P174";
+#NET "DB<10>"		LOC = "P175";
+#NET "DB<9>"		LOC = "P176";
+#NET "DB<8>"		LOC = "P178";
 NET "DB<7>"		LOC = "P179";
 NET "DB<6>"		LOC = "P180";
 NET "DB<5>"		LOC = "P181";
