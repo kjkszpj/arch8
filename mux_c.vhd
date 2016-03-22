@@ -37,14 +37,9 @@ end mux_c;
 
 architecture Behavioral of mux_c is
 begin
-	process (muxc, sp, adr, pc)
-	begin
-		case muxc is
-			when "00" =>	ab <= sp;
-			when "01" =>	ab <= adr;
-			when "10" =>	ab <= pc;
-			when others =>	ab <= "ZZZZZZZZZZZZZZZZ";
-		end case;
-	end process;
+	ab <= 	sp	when muxc = "00" else
+			adr	when muxc = "01" else
+			pc	when muxc = "10" else
+			"ZZZZZZZZZZZZZZZZ";
 end Behavioral;
 

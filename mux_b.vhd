@@ -39,17 +39,11 @@ end mux_b;
 
 architecture Behavioral of mux_b is
 begin
-	--- what about key and print thing?
-	process (muxb, alu, pch, pcl, adrh, adrl)
-	begin
-		case muxb is
-			when "000" =>		db <= alu;
-			when "001" =>		db <=	pch;
-			when "010" =>		db <= pcl;
-			when "100" =>		db <= adrh;
-			when "101" => 		db <= adrl;
-			when others =>		db <= "ZZZZZZZZ";
-		end case;
-	end process;
+	db <= 	alu	when muxb = "000" else
+			pch	when muxb = "001" else
+			pcl	when muxb = "010" else
+			adrh when muxb = "100" else
+			adrl when muxb = "101" else
+			"ZZZZZZZZ";
 end Behavioral;
 

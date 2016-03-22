@@ -64,7 +64,7 @@ architecture Behavioral of cpu_main is
 		 Port ( clk : in  STD_LOGIC;
 				  load : in  STD_LOGIC;
 				  x : in  STD_LOGIC_VECTOR (7 downto 0);
-				  r : out  STD_LOGIC_VECTOR (7 downto 0));
+				  r : inout  STD_LOGIC_VECTOR (7 downto 0));
 	end component;			  
 	component mux_a is
 		 Port ( muxa : in  STD_LOGIC;
@@ -146,6 +146,7 @@ signal muxa			: STD_LOGIC;					---alub的??路选择器
 signal alus			: STD_LOGIC_VECTOR (2 downto 0);		---alu function选择
 ---TODO, signal CY
 signal ir_load		: STD_LOGIC;
+---signal ir_reset	: STD_LOGIC;
 signal adrh_load	: STD_LOGIC;
 signal adrl_load	: STD_LOGIC;
 signal ahs			: STD_LOGIC;					---在adrh里面填0x7E, for @Aj
@@ -221,32 +222,27 @@ signal iow			: STD_LOGIC;
 -----begin of program-----
 begin
 	ia:		reg_a port map(db, mclk, a_load, a_asr, a_clear, a);
-	--- TODO, no act
-	--- iact:		reg1 port map(mclk, act_load, a, act);
-	--- alua <= act;
 	alua <= a;
 	
-	itmp:		reg1 port map(mclk, tmp_load, db, tmp);
+	itmp:	reg1 port map(mclk, tmp_load, db, tmp);
 	iregs:	regs port map(reg_load, needj, mclk, regi, regj, db, reg, r0, r1, r2, r3);
 	imuxa:	mux_a port map(muxa, tmp, reg, ma);
 	alub <= ma;
 	
-	ialu:		alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
+	ialu:	alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
 	iir:		reg1 port map(mclk, ir_load, db, ir);
-	iadr:		reg_adr port map(mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
+---	iir:		reg_a port map(db, mclk, ir_load, '1', ir_reset, ir);
+	iadr:	reg_adr port map(mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
-	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
+	imuxc:	mux_c port map(mir(19 downto 18), sp, adr, pc, mc);
 	
 	crd <= crdx or not mclk;			---在mclk高???绞笨赡芊⑸?	
 	cwr <= cwrx or not mclk;
 	mrd <= crd or ab(15);
 	mwr <= cwr or ab(15) or not clk;
-	
-	---TODO, check
-	
-	---TODO, decode ir, check it
+
 	md <=	("000" & ir(7 downto 4) & "111") when ir(7 downto 4) <= "0101" else
 			("000" & ir(5 downto 2) & "111") when ir(7) = '0' else
 			("00" & ir(7 downto 3) & "111");
@@ -261,13 +257,20 @@ begin
 			end if;
 		end if;
 	end process;
-	CI(9 downto 0) <= mpc;
-	CI(15 downto 10) <= "000000";
+
+	imclr: process (mclk, reset)
+	begin
+		if (reset = '0') then mpc_reset <= '0';
+		elsif (mclk'event and mclk = '1') then mpc_reset <= run;
+		end if;
+	end process;
+
+	ci(9 downto 0) <= mpc;
+	ci(15 downto 10) <= "000000";
 
 	imir: process (mick)
 	begin
 		if (mick'event and mick = '1') then
-		---TODO, co or ci?
 			mir <= co;
 		end if;
 	end process;
@@ -285,7 +288,7 @@ begin
 	---reset signal
 	pc_reset <= reset;
 	sp_reset <= reset;
-	mpc_reset <= reset;
+	---ir_reset <= reset;
 
 	---pc_l
 	ipc_load: process (pc_load, CF, ZF, NF)
@@ -356,7 +359,7 @@ begin
 	---bus, ab, db, probably cb?
 	ab <= mc;
 	db <= krix & "000000" & prix when io_query = '0' else
-			mb;
+		 mb;
 	
 	---control bus
 	clk <= sCLK;
@@ -377,19 +380,26 @@ begin
 	pcl <= pc(7 downto 0);
 	adr <= adrh & adrl;
 	
-	---MUX, to watch signal at CI(16--31)
-	CI(31 downto 24) <= 			a	when sMUX = "000" else
-								pch	when sMUX = "001" else
-								adrh	when sMUX = "010" else
-								r0	when sMUX = "011" else
-								r2	when sMUX = "100" else
-								mpc(7 downto 0) when sMUX = "101" else
-								CO(31 downto 24);
-	CI(23 downto 16) <=				ir	when sMUX = "000" else
-								pcl	when sMUX = "001" else
-								adrl	when sMUX = "010" else
-								r1	when sMUX = "011" else
-								r3 or CO(23 downto 16);
+	---MUX, to watch signal at ci(16--31)
+	ci(31 downto 24) <= 		a	when sMUX = "000" else
+							pch	when sMUX = "001" else
+							adrh	when sMUX = "010" else
+							r0	when sMUX = "011" else
+							r2	when sMUX = "100" else
+							"000000" & ir_load &mclk when sMUX = "101" else
+							--"110000" & mpc(9 downto 8) when sMUX = "101" else
+							mir(31 downto 24) when sMUX = "110" else
+							mir(15 downto 8) when sMUX = "111" else
+							"00000000";	
+	ci(23 downto 16) <=			ir	when sMUX = "000" else
+							pcl	when sMUX = "001" else
+							adrl	when sMUX = "010" else
+							r1	when sMUX = "011" else
+							r3	when sMUX = "100" else	 
+							mpc(7 downto 0) when sMUX = "101" else
+							mir(23 downto 16) when sMUX = "110" else
+							mir(7 downto 0) when sMUX = "111" else
+							"00000000";
 								
 	---control signal list from mir
 	a_load <= mir(0);

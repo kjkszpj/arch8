@@ -32,7 +32,7 @@ entity reg_a is
            mclk : in  STD_LOGIC;
            a_load : in  STD_LOGIC;
            asr : in  STD_LOGIC;
-			  a_clear : in  STD_LOGIC;
+		 a_clear : in  STD_LOGIC;
            a : inout  STD_LOGIC_VECTOR (7 downto 0));
 end reg_a;
 

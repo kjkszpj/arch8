@@ -32,9 +32,9 @@ entity reg2 is
            inc : in  STD_LOGIC;
            dec : in  STD_LOGIC;
            load : in  STD_LOGIC;
-			  reset : in  STD_LOGIC;
+		 reset : in  STD_LOGIC;
            x : in  STD_LOGIC_VECTOR (15 downto 0);
-			  y : in  STD_LOGIC_VECTOR (15 downto 0);
+		 y : in  STD_LOGIC_VECTOR (15 downto 0);
            r : inout  STD_LOGIC_VECTOR (15 downto 0));
 end reg2;
 

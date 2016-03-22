@@ -31,7 +31,7 @@ entity reg1 is
     Port ( clk : in  STD_LOGIC;
            load : in  STD_LOGIC;
            x : in  STD_LOGIC_VECTOR (7 downto 0);
-           r : out  STD_LOGIC_VECTOR (7 downto 0));
+           r : inout  STD_LOGIC_VECTOR (7 downto 0));
 end reg1;
 
 architecture Behavioral of reg1 is
@@ -39,7 +39,9 @@ begin
 	process (clk)
 	begin
 		if (clk'event and clk = '0') then
-			if (load = '0') then r <= x; end if;
+			if (load = '0') then r <= x;
+			else r <= r;
+			end if;
 		end if;
 	end process;
 end Behavioral;
