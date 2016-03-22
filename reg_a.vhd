@@ -38,16 +38,17 @@ end reg_a;
 
 architecture Behavioral of reg_a is
 begin
-	process (mclk)
-	variable temp : STD_LOGIC_VECTOR (2 downto 0);
+	process (mclk, a_clear)
+	variable temp : STD_LOGIC_VECTOR (1 downto 0);
 	begin
-		if (mclk'event and mclk = '0') then
-			temp := (a_load, asr, a_clear);
+		if (a_clear = '0') then
+			a <= "00000000";
+		elsif (mclk'event and mclk = '0') then
+			temp := (a_load, asr);
 			case temp is
-				when "111" =>	a <= a;
-				when "011" =>	a <= db;
-				when "101" =>	a <= a(7) & a(7 downto 1);
-				when "110" =>	a <= "00000000";
+				when "11" =>	a <= a;
+				when "01" =>	a <= db;
+				when "10" =>	a <= a(7) & a(7 downto 1);
 				when others =>	a <= a;
 			end case;
 		end if;

@@ -41,7 +41,7 @@ end reg_adr;
 architecture Behavioral of reg_adr is
 begin
 	---	for adrh, 0b01111110 = 0x7E
-	process (mclk, adrh_load, ahs)
+	process (mclk)
 	variable temp : STD_LOGIC_VECTOR(2 downto 0);
 	begin
 		if (mclk'event and mclk = '0') then
@@ -56,7 +56,7 @@ begin
 	end process;
 	
 	---	for adrl
-	process (mclk, adrl_load)
+	process (mclk)
 	variable temp : STD_LOGIC_VECTOR(1 downto 0);
 	begin
 		if (mclk'event and mclk = '0') then 

@@ -3,6 +3,7 @@ arch8_xdb/
 *.lst
 *.s19
 *.html
+*.ntrc_log
 
 *.bgn
 *.bit

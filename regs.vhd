@@ -44,7 +44,6 @@ end regs;
 architecture Behavioral of regs is
 signal ri : STD_LOGIC_VECTOR (7 downto 0);
 signal rj : STD_LOGIC_VECTOR (7 downto 0);
-signal mask : STD_LOGIC_VECTOR (7 downto 0);
 begin
 	---load logic, always load to ri.
 	process (mclk)
@@ -61,29 +60,17 @@ begin
 		end if;
 	end process;
 	
-	---read ri logic
-	process (i, r0, r1, r2, r3)
-	begin
-		case i is
-			when "00" =>	ri <= r0;
-			when "01" =>	ri <= r1;
-			when "10" =>	ri <= r2;
-			when others =>	ri <= r3;
-		end case;
-	end process;
+	ri <= r0	when i = "00" else
+			r1 when i = "01" else
+			r2 when i = "10" else
+			r3;
 	
-	---read ri logic
-	process (j, r0, r1, r2, r3)
-	begin
-		case j is
-			when "00" =>	rj <= r0;
-			when "01" =>	rj <= r1;
-			when "10" =>	rj <= r2;
-			when others =>	rj <= r3;
-		end case;
-	end process;
+	rj <= r0	when j = "00" else
+			r1 when j = "01" else
+			r2 when j = "10" else
+			r3;
 	
-	mask <= (needj, needj, needj, needj, needj, needj, needj, needj);
-	r <= (ri and mask) or (rj and not mask);
+	r <= 	rj when needj = '0' else
+			ri;
 end Behavioral;
 
