@@ -40,7 +40,6 @@ begin
 	begin
 		if (clk'event and clk = '0') then
 			if (load = '0') then r <= x;
-			else r <= r;
 			end if;
 		end if;
 	end process;

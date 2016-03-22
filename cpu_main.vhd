@@ -142,9 +142,8 @@ signal reg_load	: STD_LOGIC;
 signal needj		: STD_LOGIC;					---寄存器组, 用ri还是rj
 signal regi			: STD_LOGIC_VECTOR (1 downto 0);		---regi编号
 signal regj			: STD_LOGIC_VECTOR (1 downto 0);		---regj编号
-signal muxa			: STD_LOGIC;					---alub的??路选择器
+signal muxa			: STD_LOGIC;					---alub的2路选择器
 signal alus			: STD_LOGIC_VECTOR (2 downto 0);		---alu function选择
----TODO, signal CY
 signal ir_load		: STD_LOGIC;
 ---signal ir_reset	: STD_LOGIC;
 signal adrh_load	: STD_LOGIC;
@@ -171,7 +170,7 @@ signal flag_set	: STD_LOGIC;
 signal mux_cin		: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 ---clk
-signal mclk			: STD_LOGIC;					---微程序时钟
+signal mclk		: STD_LOGIC;					---微程序时钟
 signal mpck		: STD_LOGIC;
 signal mick		: STD_LOGIC;
 
@@ -238,11 +237,15 @@ begin
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
 	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
 	
-	crd <= crdx or not mclk;			---在mclk高???绞笨赡芊⑸?	
+	---read write
+	crd <= crdx or not mclk;			---在mclk高电平可以写入
 	cwr <= cwrx or not mclk;
 	mrd <= crd or ab(15);
-	mwr <= cwr or ab(15) or not clk;
+	mwr <= cwr or ab(15) or not clk;	---在clk高电平
+	ior <= not ab(15) or not ab(0) or crd;
+	iow <= not ab(15) or not ab(1) or cwr or not clk;	---在clk第二周期高电平写入？
 
+	---micro decode
 	md <=	("000" & ir(7 downto 4) & "111") when ir(7 downto 4) <= "0101" else
 			("000" & ir(5 downto 2) & "111") when ir(7) = '0' else
 			("00" & ir(7 downto 3) & "111");
@@ -255,13 +258,6 @@ begin
 			if (mpc_load = '0') then mpc <= md;
 			else mpc <= mpc + 1;
 			end if;
-		end if;
-	end process;
-
-	imclr: process (mclk, reset)
-	begin
-		if (reset = '0') then mpc_reset <= '0';
-		elsif (mclk'event and mclk = '1') then mpc_reset <= run;
 		end if;
 	end process;
 
@@ -285,23 +281,23 @@ begin
 	mpck <= not mclk and clk;
 	mick <= not mpck;
 	
-	---reset signal
+	---reset thing
 	pc_reset <= reset;
 	sp_reset <= reset;
+	impc_reset: process (mclk, reset)
+	begin
+		if (reset = '0') then mpc_reset <= '0';
+		elsif (mclk'event and mclk = '1') then mpc_reset <= run;
+		end if;
+	end process;
 	---ir_reset <= reset;
 
-	---pc_l
-	ipc_load: process (pc_load, CF, ZF, NF)
-	begin
-		case pc_load is
-			when "000" =>	pc_l <= '0';		---always load
-			when "001" =>	pc_l <= not CF;		---JC
-			when "010" =>	pc_l <= NF or ZF;	---JP
-			when "011" =>	pc_l <= ZF;			---JNZ
-			when "111" =>	pc_l <= '1';		---not load
-			when others =>	pc_l <= '1';
-		end case;
-	end process;
+	---pc_l, '0' for load
+	pc_l <= 	'0' 		when pc_load = "000" else 
+				not CF 	when pc_load = "001" else
+				NF or ZF	when pc_load = "010" else
+				ZF 		when pc_load = "011" else
+				'1';
 
 	---flag
 	icf: process (mclk)
@@ -317,7 +313,8 @@ begin
 	begin
 		if (mclk'event and mclk = '0') then 
 			if (flag_set = '0') then
-				zf <= not (alu_result(7) or alu_result(6) or alu_result(5) or alu_result(4) or alu_result(3) or alu_result(2) or alu_result(1) or alu_result(0));
+				if (alu_result = "00000000") then zf <= '1'; else zf <= '0';
+				end if;
 			end if;
 		end if;
 	end process;
@@ -350,16 +347,13 @@ begin
 		end if;
 	end process;
 	
-	---io related, query about 0xC000 before io
+	---io related, query about 0xC000 before IO
 	io_query <= not (ab(15) and ab(14)) or crd;
-	---warning, clk related? io & clk
-	ior <= not ab(15) or not ab(0) or crd;
-	iow <= not ab(15) or not ab(1) or cwr or not clk;
 	
 	---bus, ab, db, probably cb?
 	ab <= mc;
 	db <= krix & "000000" & prix when io_query = '0' else
-		 mb;
+			mb;
 	
 	---control bus
 	clk <= sCLK;
@@ -386,7 +380,7 @@ begin
 							adrh	when sMUX = "010" else
 							r0	when sMUX = "011" else
 							r2	when sMUX = "100" else
-							"000000" & ir_load &mclk when sMUX = "101" else
+							"000000" & ir_load & mclk when sMUX = "101" else
 							--"110000" & mpc(9 downto 8) when sMUX = "101" else
 							mir(31 downto 24) when sMUX = "110" else
 							mir(15 downto 8) when sMUX = "111" else

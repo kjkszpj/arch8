@@ -37,7 +37,7 @@ end mux_a;
 architecture Behavioral of mux_a is
 signal mask : STD_LOGIC_VECTOR (7 downto 0);
 begin
-	mask <= muxa & muxa & muxa & muxa & muxa & muxa & muxa & muxa;
-	result_a <= (mask and tmp) or ((not mask) and a);						--- select a for muxa = '0'
+	result_a <= tmp	when muxa = '1' else
+					a;
 end Behavioral;
 

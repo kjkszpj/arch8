@@ -42,31 +42,19 @@ signal result_a : STD_LOGIC_VECTOR (8 downto 0);
 signal result_l : STD_LOGIC_VECTOR (7 downto 0);
 signal mask : STD_LOGIC_VECTOR (7 downto 0);
 begin
-	mask <= (m, m, m, m, m, m, m, m);
-	--- l part
-	process (a, b, s)
-	begin
-		case s is
-			when "00" =>	result_l <= a;
-			when "01" =>	result_l <= b;
-			when "10" =>	result_l <= a or b;
-			when "11" =>	result_l <= not b;
-			when others =>	result_l <= "00000000";
-		end case;
-	end process;
+	result_l <= a when s = "00" else
+					b when s = "01" else
+					a or b when s = "10" else
+					not b when s = "11" else
+					"00000000";
+					
+	result_a <= ("0" & a) + ("0" & b) when s = "00" else
+					("0" & a) - ("0" & b) when s = "01" else
+					("0" & a) + ("0" & b) + ("00000000" & cin) when s = "10" else
+					"000000000";
 	
-	--- a part
-	process (a, b, cin, s)
-	begin
-		case s is
-			when "00" =>	result_a <= ("0" & a) + ("0" & b);
-			when "01" => 	result_a <= ("0" & a) - ("0" & b);
-			when "10" =>	result_a <= ("0" & a) + ("0" & b) + ("00000000" & cin);
-			when others =>	result_a <= "000000000";
-		end case;
-	end process;
-	
+	result <= 	result_a(7 downto 0) when m = '1' else
+					result_l;
 	cout <= result_a(8);
-	result <= (result_l and not mask) or (result_a(7 downto 0) and mask);
 end Behavioral;
 
