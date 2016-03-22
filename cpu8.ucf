@@ -112,7 +112,7 @@ NET "sCLK"		LOC = "P94";
 #NET "sCLKG"		LOC = "P80";
 NET "sRUN"		LOC = "P109";
 NET "sRESET"		LOC = "P108";
-NET "sPRIX"		LOC= "P193";
+NET "sPRIX"		LOC = "P193";
 NET "sKRIX"		LOC = "P194";
 
 #PINLOCK_END

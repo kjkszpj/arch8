@@ -171,8 +171,8 @@ signal mux_cin		: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 ---clk
 signal mclk			: STD_LOGIC;					---Œ¢≥Ã–Ú ±÷”
-signal mpc_clk		: STD_LOGIC;
-signal mir_clk		: STD_LOGIC;
+signal mpck		: STD_LOGIC;
+signal mick		: STD_LOGIC;
 
 ---output or temperate signal
 signal mrd			: STD_LOGIC;
@@ -252,10 +252,10 @@ begin
 			("00" & ir(7 downto 3) & "111");
 	
 	---mpc & mir
-	impc: process (mpc_clk, mpc_reset)
+	impc: process (mpck, mpc_reset)
 	begin
 		if (mpc_reset = '0') then mpc <= "0000000000";
-		elsif (mpc_clk'event and mpc_clk = '1') then 
+		elsif (mpck'event and mpck = '1') then 
 			if (mpc_load = '0') then mpc <= md;
 			else mpc <= mpc + 1;
 			end if;
@@ -264,9 +264,9 @@ begin
 	CI(9 downto 0) <= mpc;
 	CI(15 downto 10) <= "000000";
 
-	imir: process (mir_clk)
+	imir: process (mick)
 	begin
-		if (mir_clk'event and mir_clk = '1') then
+		if (mick'event and mick = '1') then
 		---TODO, co or ci?
 			mir <= co;
 		end if;
@@ -279,8 +279,8 @@ begin
 		elsif (clk'event and clk = '0') then mclk <= not mclk;
 		end if;
 	end process;
-	mpc_clk <= not mclk and clk;
-	mir_clk <= not mpc_clk;
+	mpck <= not mclk and clk;
+	mick <= not mpck;
 	
 	---reset signal
 	pc_reset <= reset;
@@ -348,7 +348,7 @@ begin
 	end process;
 	
 	---io related, query about 0xC000 before io
-	io_query <= not (ab(15) and ab(14)) or mrd;
+	io_query <= not (ab(15) and ab(14)) or crd;
 	---warning, clk related? io & clk
 	ior <= not ab(15) or not ab(0) or crd;
 	iow <= not ab(15) or not ab(1) or cwr or not clk;
