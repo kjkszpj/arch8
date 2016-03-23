@@ -74,12 +74,13 @@ architecture Behavioral of cpu_main is
 				  result_a : out  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component mux_b is
-		 Port ( muxb : in  STD_LOGIC_VECTOR (2 downto 0);
+		 Port ( muxb : in  STD_LOGIC_VECTOR (3 downto 0);
 				  alu : in  STD_LOGIC_VECTOR (7 downto 0);
 				  pch : in  STD_LOGIC_VECTOR (7 downto 0);
 				  pcl : in  STD_LOGIC_VECTOR (7 downto 0);
 				  adrh : in  STD_LOGIC_VECTOR (7 downto 0);
 				  adrl : in  STD_LOGIC_VECTOR (7 downto 0);
+           		  ioq    : in  STD_LOGIC_VECTOR (7 downto 0);
 				  db : out  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component mux_c is
@@ -237,7 +238,7 @@ begin
 	iadr:	reg_adr port map(reset, mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
-	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
+	imuxb:	mux_b port map(muxb & ioquery, alu_result, pch, pcl, adrh, adrl, krix & "000000" & prix, mb);
 	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
 	
 	---read write
@@ -355,8 +356,7 @@ begin
 	
 	---bus, ab, db, probably cb?
 	ab <= mc;
-	db <= krix & "000000" & prix when io_query = '0' else
-			mb;
+	db <= mb;
 	
 	---control bus
 	clk <= sCLK;

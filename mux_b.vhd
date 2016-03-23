@@ -28,22 +28,24 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity mux_b is
-    Port ( muxb : in  STD_LOGIC_VECTOR (2 downto 0);
-           alu : in  STD_LOGIC_VECTOR (7 downto 0);
-           pch : in  STD_LOGIC_VECTOR (7 downto 0);
-           pcl : in  STD_LOGIC_VECTOR (7 downto 0);
-           adrh : in  STD_LOGIC_VECTOR (7 downto 0);
-           adrl : in  STD_LOGIC_VECTOR (7 downto 0);
-           db : out  STD_LOGIC_VECTOR (7 downto 0));
+    Port ( muxb   : in  STD_LOGIC_VECTOR (3 downto 0);
+           alu    : in  STD_LOGIC_VECTOR (7 downto 0);
+           pch    : in  STD_LOGIC_VECTOR (7 downto 0);
+           pcl    : in  STD_LOGIC_VECTOR (7 downto 0);
+           adrh   : in  STD_LOGIC_VECTOR (7 downto 0);
+           adrl   : in  STD_LOGIC_VECTOR (7 downto 0);
+           ioq    : in  STD_LOGIC_VECTOR (7 downto 0);
+           db     : out  STD_LOGIC_VECTOR (7 downto 0));
 end mux_b;
 
 architecture Behavioral of mux_b is
 begin
-	db <= 	alu	when muxb = "000" else
-			pch	when muxb = "001" else
-			pcl	when muxb = "010" else
-			adrh when muxb = "100" else
-			adrl when muxb = "101" else
+	db <= 	alu	when muxb = "0001" else
+			pch	when muxb = "0011" else
+			pcl	when muxb = "0101" else
+			adrh when muxb = "1001" else
+			adrl when muxb = "1011" else
+      ioq when muxb = "1110" else
 			"ZZZZZZZZ";
 end Behavioral;
 
