@@ -28,9 +28,10 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity reg_adr is
-    Port ( mclk : in  STD_LOGIC;
-		   db : in  STD_LOGIC_VECTOR (7 downto 0);
-		   ab : in  STD_LOGIC_VECTOR (15 downto 0);
+    Port ( reset : in STD_LOGIC;
+    		 mclk : in  STD_LOGIC;
+		 db : in  STD_LOGIC_VECTOR (7 downto 0);
+		 ab : in  STD_LOGIC_VECTOR (15 downto 0);
            adrh_load : in  STD_LOGIC;
            adrl_load : in  STD_LOGIC;
            ahs : in  STD_LOGIC;
@@ -41,10 +42,12 @@ end reg_adr;
 architecture Behavioral of reg_adr is
 begin
 	---	for adrh, 0b01111110 = 0x7E
-	process (mclk)
+	process (mclk, reset)
 	variable temp : STD_LOGIC_VECTOR(2 downto 0);
 	begin
-		if (mclk'event and mclk = '0') then
+		if (reset = '0') then
+			adrh <= "00000000";
+		elsif (mclk'event and mclk = '0') then
 			temp := adrh_load & adrl_load & ahs;
 			case temp is
 				when "011" =>	adrh <= db;
@@ -56,10 +59,12 @@ begin
 	end process;
 	
 	---	for adrl
-	process (mclk)
+	process (mclk, reset)
 	variable temp : STD_LOGIC_VECTOR(1 downto 0);
 	begin
-		if (mclk'event and mclk = '0') then 
+		if (reset = '0') then
+			adrl <= "00000000";
+		elsif (mclk'event and mclk = '0') then 
 			temp := adrh_load & adrl_load;
 			case temp is
 				when "10" =>	adrl <= db;

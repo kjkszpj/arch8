@@ -33,7 +33,7 @@ entity cpu_main is
            co : in  STD_LOGIC_VECTOR (31 downto 0);
            ci : out  STD_LOGIC_VECTOR (31 downto 0);
 			  sMUX : inout std_logic_vector(2 downto 0);
-			  sMCLK : out STD_LOGIC;
+			  ---sMCLK : out STD_LOGIC;
 			  sMRD : out STD_LOGIC;
 			  sIOW : out STD_LOGIC;
 			  sIOR : out STD_LOGIC;
@@ -61,7 +61,8 @@ architecture Behavioral of cpu_main is
 				  a : inout  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component reg1 is
-		 Port ( clk : in  STD_LOGIC;
+		 Port ( reset : in STD_LOGIC;
+    		 		  clk : in  STD_LOGIC;
 				  load : in  STD_LOGIC;
 				  x : in  STD_LOGIC_VECTOR (7 downto 0);
 				  r : inout  STD_LOGIC_VECTOR (7 downto 0));
@@ -99,7 +100,8 @@ architecture Behavioral of cpu_main is
 				  r : inout  STD_LOGIC_VECTOR (15 downto 0));
 	end component;
 	component reg_adr is
-		 Port ( mclk : in  STD_LOGIC;
+		 Port ( reset : in STD_LOGIC;
+    		 		  mclk : in  STD_LOGIC;
 				  db : in  STD_LOGIC_VECTOR (7 downto 0);
 				  ab : in  STD_LOGIC_VECTOR (15 downto 0);
 				  adrh_load : in  STD_LOGIC;
@@ -109,7 +111,8 @@ architecture Behavioral of cpu_main is
 				  adrl : inout  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component regs is
-		 Port ( reg_load : in  STD_LOGIC;
+		 Port ( reset : in STD_LOGIC;
+    		 		  reg_load : in  STD_LOGIC;
 				  needj : in  STD_LOGIC;
 				  mclk : in  STD_LOGIC;
 				  i : in  STD_LOGIC_VECTOR (1 downto 0);
@@ -145,7 +148,7 @@ signal regj			: STD_LOGIC_VECTOR (1 downto 0);		---regj编号
 signal muxa			: STD_LOGIC;					---alub的2路选择器
 signal alus			: STD_LOGIC_VECTOR (2 downto 0);		---alu function选择
 signal ir_load		: STD_LOGIC;
----signal ir_reset	: STD_LOGIC;
+signal ir_reset	: STD_LOGIC;
 signal adrh_load	: STD_LOGIC;
 signal adrl_load	: STD_LOGIC;
 signal ahs			: STD_LOGIC;					---在adrh里面填0x7E, for @Aj
@@ -223,15 +226,15 @@ begin
 	ia:		reg_a port map(db, mclk, a_load, a_asr, a_clear, a);
 	alua <= a;
 	
-	itmp:	reg1 port map(mclk, tmp_load, db, tmp);
-	iregs:	regs port map(reg_load, needj, mclk, regi, regj, db, reg, r0, r1, r2, r3);
+	itmp:	reg1 port map(reset, mclk, tmp_load, db, tmp);
+	iregs:	regs port map(reset, reg_load, needj, mclk, regi, regj, db, reg, r0, r1, r2, r3);
 	imuxa:	mux_a port map(muxa, tmp, reg, ma);
 	alub <= ma;
 	
 	ialu:	alu port map(alua, alub, cin, alus(2), alus(1 downto 0), alu_result, cout);
-	iir:		reg1 port map(mclk, ir_load, db, ir);
+	iir:		reg1 port map(reset, mclk, ir_load, db, ir);
 ---	iir:		reg_a port map(db, mclk, ir_load, '1', ir_reset, ir);
-	iadr:	reg_adr port map(mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
+	iadr:	reg_adr port map(reset, mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
 	imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
@@ -264,9 +267,10 @@ begin
 	ci(9 downto 0) <= mpc;
 	ci(15 downto 10) <= "000000";
 
-	imir: process (mick)
+	imir: process (mick, reset)
 	begin
-		if (mick'event and mick = '1') then
+		if (reset = '0') then mir <= "00000000000000000000000000000000";
+		elsif (mick'event and mick = '1') then
 			mir <= co;
 		end if;
 	end process;
@@ -290,7 +294,6 @@ begin
 		elsif (mclk'event and mclk = '1') then mpc_reset <= run;
 		end if;
 	end process;
-	---ir_reset <= reset;
 
 	---pc_l, '0' for load
 	pc_l <= 	'0' 		when pc_load = "000" else 
@@ -363,7 +366,7 @@ begin
 	krix <= sKRIX;
 	sMWR <= mwr;
 	sMRD <= mrd;
-	sMCLK <= mclk;
+	---sMCLK <= mclk;
 	sIOW <= iow;
 	sIOR <= ior;
 	
@@ -374,13 +377,13 @@ begin
 	pcl <= pc(7 downto 0);
 	adr <= adrh & adrl;
 	
-	---MUX, to watch signal at ci(16--31)
+	---MUX, to watch signal at ci(16--31)	   imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
 	ci(31 downto 24) <= 		a	when sMUX = "000" else
 							pch	when sMUX = "001" else
 							adrh	when sMUX = "010" else
-							r0	when sMUX = "011" else
+							alu_result	when sMUX = "011" else
 							r2	when sMUX = "100" else
-							"000000" & ir_load & mclk when sMUX = "101" else
+							"0000000" & ir_load when sMUX = "101" else
 							--"110000" & mpc(9 downto 8) when sMUX = "101" else
 							mir(31 downto 24) when sMUX = "110" else
 							mir(15 downto 8) when sMUX = "111" else
@@ -388,7 +391,7 @@ begin
 	ci(23 downto 16) <=			ir	when sMUX = "000" else
 							pcl	when sMUX = "001" else
 							adrl	when sMUX = "010" else
-							r1	when sMUX = "011" else
+							mb	when sMUX = "011" else
 							r3	when sMUX = "100" else	 
 							mpc(7 downto 0) when sMUX = "101" else
 							mir(23 downto 16) when sMUX = "110" else
@@ -398,7 +401,7 @@ begin
 	---control signal list from mir
 	a_load <= mir(0);
 	a_asr <= mir(1);
-	a_clear <= mir(2);
+	a_clear <= mir(2) and reset;
 	tmp_load <= mir(3);
 	sCTRL1 <= mir(4);
 	sCTRL2 <= mir(4);

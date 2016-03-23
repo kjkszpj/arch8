@@ -28,7 +28,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity regs is
-    Port ( reg_load : in  STD_LOGIC;
+    Port ( reset : in STD_LOGIC;
+    		 reg_load : in  STD_LOGIC;
            needj : in  STD_LOGIC;
            mclk : in  STD_LOGIC;
            i : in  STD_LOGIC_VECTOR (1 downto 0);
@@ -46,9 +47,14 @@ signal ri : STD_LOGIC_VECTOR (7 downto 0);
 signal rj : STD_LOGIC_VECTOR (7 downto 0);
 begin
 	---load logic, always load to ri.
-	process (mclk)
+	process (mclk, reset)
 	begin
-		if (mclk'event and mclk = '0') then
+		if (reset = '0') then
+			r0 <= "00000000";
+			r1 <= "00000000";
+			r2 <= "00000000";
+			r3 <= "00000000";
+		elsif (mclk'event and mclk = '0') then
 			if (reg_load = '0') then
 				case i is
 					when "00" =>	r0 <= db;

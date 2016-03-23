@@ -28,7 +28,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity reg1 is
-    Port ( clk : in  STD_LOGIC;
+    Port ( reset : in STD_LOGIC;
+    		 clk : in  STD_LOGIC;
            load : in  STD_LOGIC;
            x : in  STD_LOGIC_VECTOR (7 downto 0);
            r : inout  STD_LOGIC_VECTOR (7 downto 0));
@@ -36,9 +37,10 @@ end reg1;
 
 architecture Behavioral of reg1 is
 begin
-	process (clk)
+	process (clk, reset)
 	begin
-		if (clk'event and clk = '0') then
+		if (reset = '0') then r <= "00000000";
+		elsif (clk'event and clk = '0') then
 			if (load = '0') then r <= x;
 			end if;
 		end if;
