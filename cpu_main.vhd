@@ -33,7 +33,7 @@ entity cpu_main is
            co : in  STD_LOGIC_VECTOR (31 downto 0);
            ci : out  STD_LOGIC_VECTOR (31 downto 0);
 			  sMUX : inout std_logic_vector(2 downto 0);
-			  ---sMCLK : out STD_LOGIC;
+			  sMCLK : out STD_LOGIC;
 			  sMRD : out STD_LOGIC;
 			  sIOW : out STD_LOGIC;
 			  sIOR : out STD_LOGIC;
@@ -74,13 +74,15 @@ architecture Behavioral of cpu_main is
 				  result_a : out  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component mux_b is
-		 Port ( muxb : in  STD_LOGIC_VECTOR (3 downto 0);
+		 Port ( muxb   : in  STD_LOGIC_VECTOR (2 downto 0);
+    		 		  io_query : in STD_LOGIC;
 				  alu : in  STD_LOGIC_VECTOR (7 downto 0);
 				  pch : in  STD_LOGIC_VECTOR (7 downto 0);
 				  pcl : in  STD_LOGIC_VECTOR (7 downto 0);
 				  adrh : in  STD_LOGIC_VECTOR (7 downto 0);
 				  adrl : in  STD_LOGIC_VECTOR (7 downto 0);
-           		  ioq    : in  STD_LOGIC_VECTOR (7 downto 0);
+				  krix   : in STD_LOGIC;
+				  prix   : in STD_LOGIC;
 				  db : out  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	component mux_c is
@@ -238,7 +240,7 @@ begin
 	iadr:	reg_adr port map(reset, mclk, db, ab, adrh_load, adrl_load, ahs, adrh, adrl);
 	ipc:		reg2 port map(mclk, pc_inc, '1', pc_l, pc_reset, ab, "0000000000000000", pc);
 	isp:		reg2 port map(mclk, sp_inc, sp_dec, '1', sp_reset, "0000000000000000", "0111111111111111", sp);
-	imuxb:	mux_b port map(muxb & ioquery, alu_result, pch, pcl, adrh, adrl, krix & "000000" & prix, mb);
+	imuxb:	mux_b port map(muxb, io_query, alu_result, pch, pcl, adrh, adrl, krix, prix, mb);
 	imuxc:	mux_c port map(muxc, sp, adr, pc, mc);
 	
 	---read write
@@ -366,7 +368,7 @@ begin
 	krix <= sKRIX;
 	sMWR <= mwr;
 	sMRD <= mrd;
-	---sMCLK <= mclk;
+	sMCLK <= mclk;
 	sIOW <= iow;
 	sIOR <= ior;
 	
@@ -381,19 +383,18 @@ begin
 	ci(31 downto 24) <= 		a	when sMUX = "000" else
 							pch	when sMUX = "001" else
 							adrh	when sMUX = "010" else
-							alu_result	when sMUX = "011" else
-							r2	when sMUX = "100" else
-							"0000000" & ir_load when sMUX = "101" else
-							--"110000" & mpc(9 downto 8) when sMUX = "101" else
+							mb	when sMUX = "011" else
+							r0	when sMUX = "100" else
+							r2 when sMUX = "101" else
 							mir(31 downto 24) when sMUX = "110" else
 							mir(15 downto 8) when sMUX = "111" else
 							"00000000";	
 	ci(23 downto 16) <=			ir	when sMUX = "000" else
 							pcl	when sMUX = "001" else
 							adrl	when sMUX = "010" else
-							mb	when sMUX = "011" else
-							r3	when sMUX = "100" else	 
-							mpc(7 downto 0) when sMUX = "101" else
+							mpc(7 downto 0)	when sMUX = "011" else
+							r1	when sMUX = "100" else	 
+							r3 when sMUX = "101" else
 							mir(23 downto 16) when sMUX = "110" else
 							mir(7 downto 0) when sMUX = "111" else
 							"00000000";

@@ -52,6 +52,7 @@ begin
 			case temp is
 				when "011" =>	adrh <= db;
 				when "110" => 	adrh <= "01111110";
+				when "100" => 	adrh <= "01111110";
 				when "001" =>	adrh <= ab(15 downto 8);
 				when others =>	adrh <= adrh;
 			end case;
