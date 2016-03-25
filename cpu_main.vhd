@@ -383,7 +383,7 @@ begin
 	ci(31 downto 24) <= 		a	when sMUX = "000" else
 							pch	when sMUX = "001" else
 							adrh	when sMUX = "010" else
-							mb	when sMUX = "011" else
+							cf & zf & nf & "0" & pc_load & pc_l	when sMUX = "011" else
 							r0	when sMUX = "100" else
 							r2 when sMUX = "101" else
 							mir(31 downto 24) when sMUX = "110" else
@@ -406,7 +406,7 @@ begin
 	tmp_load <= mir(3);
 	sCTRL1 <= mir(4);
 	sCTRL2 <= mir(4);
-	sCTRL3 <= mir(4);
+	sCTRL3 <= mir(4);							
 	sCTRL4 <= mir(4);
 	needj <= mir(5);
 	reg_load <= mir(6);
