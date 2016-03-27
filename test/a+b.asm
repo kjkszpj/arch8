@@ -8,7 +8,8 @@ CALL calc
 mov a0, #0
 mov a1, #0
 CALL output
-exit: jmp exit
+exit:
+jmp exit
 
 init:
 	mov a0, #0
@@ -34,7 +35,8 @@ input:
 
 		ld a1, 8001h
 		mov a2, #9
-		mov a3, a1
+		mov a3, #0
+		add a3, a1
 		sub a3, a2
 		jp break_input1
 
@@ -53,7 +55,8 @@ input:
 
 		ld a1, 8001h
 		mov a2, #9
-		mov a3, a1
+		mov a3, #0
+		add a3, a1
 		sub a3, a2
 		jp break_input2
 
@@ -75,9 +78,9 @@ check_input:
 	ld a0, C000h
 	mov a1, #2h
 	sub a0, a1
-	jp print
+	jp input_ready
 	jmp check_input
-	print:
+	input_ready:
 	ret
 
 calc:
@@ -125,7 +128,8 @@ calc:
 		ld a0, 7E03h
 		ld a1, 7E01h
 		add a0, a1
-		mov a3, a0
+		mov a3, #0
+		add a3, a0
 		mov a1, @a3
 		pop a0
 		add a0, a1
@@ -160,7 +164,7 @@ getv:
 	nover:
 	ret
 
-print:
+output:
 	push a2
 	push a3
 	ld a0, 7E02h
