@@ -29,9 +29,7 @@ input:
 	push a2
 	push a3
 	loop_input1:
-		push a0
 		CALL check_input
-		pop a0
 
 		ld a1, 8001h
 		mov a2, #9
@@ -49,9 +47,7 @@ input:
 	break_input1:
 
 	loop_input2:
-		push a0
 		CALL check_input
-		pop a0
 
 		ld a1, 8001h
 		mov a2, #9
@@ -217,16 +213,32 @@ output:
 	add a0, a2
 	CALL puts
 
+	push a0
+	push a1
 	CALL check_print
+	pop a1
+	pop a0
 	mov a0, #10h
 	st a0, 8002h
+	push a0
+	push a1
 	CALL check_print
+	pop a1
+	pop a0
 	mov a0, #0bh
 	st a0, 8002h
+	push a0
+	push a1
 	CALL check_print
+	pop a1
+	pop a0
 	mov a0, #09h
 	st a0, 8002h
+	push a0
+	push a1
 	CALL check_print
+	pop a1
+	pop a0
 	mov a0, #1Ah
 	st a0, 8002h
 
@@ -252,10 +264,18 @@ check_print:
 puts:
 	push a2
 	push a3
+	push a0
+	push a1
 	CALL check_print
+	pop a1
+	pop a0
 	mov a3, #0Ah
 	st a3, 8002h
+	push a0
+	push a1
 	CALL check_print
+	pop a1
+	pop a0
 	st a3, 8002h
 	loop_put:
 		mov a3, #1
@@ -263,11 +283,19 @@ puts:
 		mov a3, @a0
 		jnz noend
 		or a3, #10h
+		push a0
+		push a1
 		CALL check_print
+		pop a1
+		pop a0
 		st a3, 8002h
 		jmp break_put
 		noend:
+		push a0
+		push a1
 		CALL check_print
+		pop a1
+		pop a0
 		st a3, 8002h
 		add a0, a2
 	jmp loop_put
