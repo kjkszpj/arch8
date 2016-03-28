@@ -128,11 +128,13 @@ calc:
 		ld a0, 7E03h
 		ld a1, 7E01h
 		add a0, a1
-		mov a3, #0
+		push a0
+		ld a0, 7E03h
+		ld a1, 7E04h
+		sub a0, a1
+		pop a3
 		add a3, a0
-		mov a1, @a3
 		pop a0
-		add a0, a1
 		mov @a3, a0
 
 		mov a2, #10
