@@ -380,7 +380,7 @@ begin
 	adr <= adrh & adrl;
 	
 	---MUX, to watch signal at ci(16--31)	   imuxb:	mux_b port map(muxb, alu_result, pch, pcl, adrh, adrl, mb);
-	ci(31 downto 24) <= 		a	when sMUX = "000" else
+	ci(31 downto 24) <= 		pcl	when sMUX = "000" else
 							pch	when sMUX = "001" else
 							adrh	when sMUX = "010" else
 							cf & zf & nf & "0" & pc_load & pc_l	when sMUX = "011" else
