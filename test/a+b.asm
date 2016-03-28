@@ -152,7 +152,35 @@ calc:
 		sub a1, a2
 		st a0, 7E04h
 		st a1, 7E05h
-	jmp loop calc:
+		ld a3, 7E02h
+		sub a3, a0
+		jp overa
+		jmp loop_calc
+		overa:
+		ld a3, 7E03h
+		sub a3, a1
+		jp overb
+		jmp loop_calc
+	overb:
+	ld a0, 7E03h
+	ld a1, 7E04h
+	sub a0, a1
+	st a0, 7E06h
+
+	ld a0, 7E03h
+	ld a1, 7E01h
+	add a0, a1
+	ld a1, 7E06h
+	add a0, a1
+	mov a2, #1
+	add a0, a2
+	mov a0, @a0
+	or a0, #0
+	jp carryc
+	jmp ncarryc
+	carryc:
+	inc 7E06h
+	ncarryc:
 	pop a3
 	pop a2
 	ret
