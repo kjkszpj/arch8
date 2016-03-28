@@ -134,7 +134,11 @@ calc:
 		sub a0, a1
 		pop a3
 		add a3, a0
+		mov a2, #1
+		sub a3, a2
 		pop a0
+		mov a1, @a3
+		add a0, a1
 		mov @a3, a0
 
 		mov a2, #10
@@ -191,7 +195,9 @@ getv:
 	jmp nover
 	over:
 	mov a0, #0
+	ret
 	nover:
+	mov a0, @a0
 	ret
 
 output:
