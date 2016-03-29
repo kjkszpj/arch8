@@ -12,7 +12,7 @@ exit:
 jmp exit
 
 init:
-	mov a0, #0
+	mov a0, #0h
 	mov a2, #0
 	st a0, 7E00h
 	loop_1:
@@ -173,14 +173,15 @@ calc:
 	ld a1, 7E06h
 	add a0, a1
 	mov a2, #1
-	add a0, a2
+	sub a0, a2
 	mov a0, @a0
 	or a0, #0
 	jp carryc
-	jmp ncarryc
+	ld a0, 7E06h
+	mov a2, #1
+	sub a0, a2
+	st a0, 7E06h
 	carryc:
-	inc 7E06h
-	ncarryc:
 	pop a3
 	pop a2
 	ret
@@ -213,32 +214,16 @@ output:
 	add a0, a2
 	CALL puts
 
-	push a0
-	push a1
 	CALL check_print
-	pop a1
-	pop a0
 	mov a0, #10h
 	st a0, 8002h
-	push a0
-	push a1
 	CALL check_print
-	pop a1
-	pop a0
 	mov a0, #0bh
 	st a0, 8002h
-	push a0
-	push a1
 	CALL check_print
-	pop a1
-	pop a0
 	mov a0, #09h
 	st a0, 8002h
-	push a0
-	push a1
 	CALL check_print
-	pop a1
-	pop a0
 	mov a0, #1Ah
 	st a0, 8002h
 
@@ -253,29 +238,25 @@ output:
 	ret
 
 check_print:
+	push a2
+	push a3
 	checkPrinter:
-	ld a0, C000h
-	or a0, #80h
-	mov a1, #81h
-	sub a0, a1
+	ld a2, C000h
+	or a2, #80h
+	mov a3, #81h
+	sub a2, a3
 	jnz checkPrinter
+	pop a3
+	pop a2
 	ret
 
 puts:
 	push a2
 	push a3
-	push a0
-	push a1
 	CALL check_print
-	pop a1
-	pop a0
 	mov a3, #0Ah
 	st a3, 8002h
-	push a0
-	push a1
 	CALL check_print
-	pop a1
-	pop a0
 	st a3, 8002h
 	loop_put:
 		mov a3, #1
@@ -283,19 +264,11 @@ puts:
 		mov a3, @a0
 		jnz noend
 		or a3, #10h
-		push a0
-		push a1
 		CALL check_print
-		pop a1
-		pop a0
 		st a3, 8002h
 		jmp break_put
 		noend:
-		push a0
-		push a1
 		CALL check_print
-		pop a1
-		pop a0
 		st a3, 8002h
 		add a0, a2
 	jmp loop_put
