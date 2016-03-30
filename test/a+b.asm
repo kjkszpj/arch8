@@ -12,7 +12,7 @@ exit:
 jmp exit
 
 init:
-	mov a0, #0
+	mov a0, #0h
 	mov a2, #0
 	st a0, 7E00h
 	loop_1:
@@ -173,14 +173,15 @@ calc:
 	ld a1, 7E06h
 	add a0, a1
 	mov a2, #1
-	add a0, a2
+	sub a0, a2
 	mov a0, @a0
 	or a0, #0
 	jp carryc
-	jmp ncarryc
+	ld a0, 7E06h
+	mov a2, #1
+	sub a0, a2
+	st a0, 7E06h
 	carryc:
-	inc 7E06h
-	ncarryc:
 	pop a3
 	pop a2
 	ret
